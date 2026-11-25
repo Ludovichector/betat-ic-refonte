@@ -92,7 +92,7 @@ function intro() {
 (function boot() {
   const loader = $('[data-loader]');
   if (!animated) { intro(); return; }
-  if (store.get('betat-seen') || !loader) { setTimeout(intro, loader ? 420 : 0); store.set('betat-seen', '1'); return; }
+  if (store.get('betat-seen') || !loader) { setTimeout(intro, 0); store.set('betat-seen', '1'); return; }
   store.set('betat-seen', '1');
   if (lenis) lenis.stop();
   const num = $('[data-loader-count]', loader); const o = { v: 0 };
@@ -137,7 +137,7 @@ function setMenu(open) {
   // Menu ouvert : le reste de la page devient inerte (clavier et lecteurs d'écran restent dans le menu),
   // puis le focus revient sur le bouton d'origine à la fermeture.
   if (open) setMenu.from = document.activeElement;
-  $$('main, .footer, .header, .dock, .rail').forEach((el) => { el.inert = open; });
+  $$('main, .footer, .header, .rail').forEach((el) => { el.inert = open; });
   if (!open && setMenu.from && setMenu.from.focus) setMenu.from.focus({ preventScroll: true });
   menu.classList.toggle('is-open', open);
   menu.setAttribute('aria-hidden', String(!open));
@@ -149,8 +149,7 @@ $$('[data-menu-open]').forEach((b) => b.addEventListener('click', () => setMenu(
 $$('[data-menu-close]').forEach((b) => b.addEventListener('click', () => setMenu(false)));
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setMenu(false); closeLightbox(); } });
 
-/* ---------- Transitions entre pages et ancres ---------- */
-const curtain = $('[data-curtain]');
+/* ---------- Ancres et liens internes ---------- */
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');
   if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || a.target === '_blank' || a.hasAttribute('data-lightbox') || a.hasAttribute('download')) return;
@@ -162,12 +161,7 @@ document.addEventListener('click', (e) => {
     return;
   }
   if (url.pathname === location.pathname && !url.hash) { e.preventDefault(); setMenu(false); if (lenis) lenis.scrollTo(0); else window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-  if (!animated || !curtain) return;
-  e.preventDefault();
-  curtain.classList.add('is-leaving');
-  setTimeout(() => { location.href = a.href; }, 640);
 });
-window.addEventListener('pageshow', (e) => { if (e.persisted && curtain) curtain.classList.remove('is-leaving'); });
 if (location.hash) window.addEventListener('load', () => { const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => scrollToEl(el), 700); });
 
 /* ---------- Curseur, boutons magnétiques, inclinaison 3D ---------- */
@@ -396,17 +390,6 @@ $$('[data-svc]').forEach((list) => {
   rows.forEach((r, i) => {
     r.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(i); });
     r.addEventListener('focus', () => show(i));
-  });
-});
-
-/* ---------- Équipe : volets ---------- */
-$$('[data-crew]').forEach((crew) => {
-  const items = $$('.crew__item', crew);
-  const open = (it) => items.forEach((x) => x.classList.toggle('is-active', x === it));
-  items.forEach((it) => {
-    it.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') open(it); });
-    it.addEventListener('focus', () => open(it));
-    it.addEventListener('click', () => open(it));
   });
 });
 
